@@ -1,7 +1,7 @@
 [
     {
       "name": "OrderCollection",
-      "policy": "OR('ProducerMSP.member', 'SupplierMSP.member')",
+      "policy": "OR('CentralBankMSP.member', 'CommercialBankMSP.member')",
       "requiredPeerCount": 1,
       "maxPeerCount": 1,
       "blockToLive": 100,

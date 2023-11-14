@@ -2,20 +2,19 @@
 version: '3.7'
 
 volumes:
-  orderer.pharma.com:
-  peer0.producer.pharma.com:
-  peer0.supplier.pharma.com:
-  peer0.wholesaler.pharma.com:
-  peer0.retailer.pharma.com:
+  orderer.coin.com:
+  peer0.centralbank.coin.com:
+  peer0.commercialbank.coin.com:
+  peer0.consumer.coin.com:
 
 networks:
-  pharma:
-    name: fabric_pharmaceutical
+  coin:
+    name: fabric_cbdc
 
 services:
 
-  orderer.pharma.com:
-    container_name: orderer.pharma.com
+  orderer.coin.com:
+    container_name: orderer.coin.com
     image: hyperledger/fabric-orderer:2.5.4
     labels:
       service: hyperledger-fabric
@@ -41,20 +40,20 @@ services:
       - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:7053
-      - ORDERER_OPERATIONS_LISTENADDRESS=orderer.pharma.com:9443
+      - ORDERER_OPERATIONS_LISTENADDRESS=orderer.coin.com:9443
       - ORDERER_METRICS_PROVIDER=prometheus
     working_dir: /root
     command: orderer
     volumes:
-        - ../organizations/ordererOrganizations/pharma.com/orderers/orderer.pharma.com/msp:/var/hyperledger/orderer/msp
-        - ../organizations/ordererOrganizations/pharma.com/orderers/orderer.pharma.com/tls/:/var/hyperledger/orderer/tls
-        - orderer.pharma.com:/var/hyperledger/production/orderer
+        - ../organizations/ordererOrganizations/coin.com/orderers/orderer.coin.com/msp:/var/hyperledger/orderer/msp
+        - ../organizations/ordererOrganizations/coin.com/orderers/orderer.coin.com/tls/:/var/hyperledger/orderer/tls
+        - orderer.coin.com:/var/hyperledger/production/orderer
     ports:
       - 7050:7050
       - 7053:7053
       - 9443:9443
     networks:
-      - pharma
+      - coin
 
   couchdb0:
     container_name: couchdb0
@@ -67,10 +66,10 @@ services:
     ports:
       - "5984:5984"
     networks:
-      - pharma
+      - coin
 
-  peer0.producer.pharma.com:
-    container_name: peer0.producer.pharma.com
+  peer0.centralbank.coin.com:
+    container_name: peer0.centralbank.coin.com
     image: hyperledger/fabric-peer:2.5.4
     labels:
       service: hyperledger-fabric
@@ -78,25 +77,25 @@ services:
       - FABRIC_LOGGING_SPEC=INFO
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_pharmaceutical
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_cbdc
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=false
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variables
-      - CORE_PEER_ID=peer0.producer.pharma.com
-      - CORE_PEER_ADDRESS=peer0.producer.pharma.com:7051
+      - CORE_PEER_ID=peer0.centralbank.coin.com
+      - CORE_PEER_ADDRESS=peer0.centralbank.coin.com:7051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.producer.pharma.com:7052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.centralbank.coin.com:7052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.producer.pharma.com:7051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.producer.pharma.com:7051
-      - CORE_PEER_LOCALMSPID=ProducerMSP
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.centralbank.coin.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.centralbank.coin.com:7051
+      - CORE_PEER_LOCALMSPID=CentralBankMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer0.producer.pharma.com:9444
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.centralbank.coin.com:9444
       - CORE_METRICS_PROVIDER=prometheus
-      - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0producer"}
+      - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0centralbank"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
@@ -104,8 +103,8 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ../organizations/peerOrganizations/producer.pharma.com/peers/peer0.producer.pharma.com:/etc/hyperledger/fabric
-      - peer0.producer.pharma.com:/var/hyperledger/production
+      - ../organizations/peerOrganizations/centralbank.coin.com/peers/peer0.centralbank.coin.com:/etc/hyperledger/fabric
+      - peer0.centralbank.coin.com:/var/hyperledger/production
     working_dir: /root
     command: peer node start
     ports:
@@ -114,7 +113,7 @@ services:
     depends_on:
       - couchdb0
     networks:
-      - pharma
+      - coin
 
   couchdb1:
     container_name: couchdb1
@@ -127,10 +126,10 @@ services:
     ports:
       - "7984:5984"
     networks:
-      - pharma
+      - coin
 
-  peer0.supplier.pharma.com:
-    container_name: peer0.supplier.pharma.com
+  peer0.commercialbank.coin.com:
+    container_name: peer0.commercialbank.coin.com
     image: hyperledger/fabric-peer:2.5.4
     labels:
       service: hyperledger-fabric
@@ -138,25 +137,25 @@ services:
       - FABRIC_LOGGING_SPEC=INFO
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_pharmaceutical
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_cbdc
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=false
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variables
-      - CORE_PEER_ID=peer0.supplier.pharma.com
-      - CORE_PEER_ADDRESS=peer0.supplier.pharma.com:9051
+      - CORE_PEER_ID=peer0.commercialbank.coin.com
+      - CORE_PEER_ADDRESS=peer0.commercialbank.coin.com:9051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.supplier.pharma.com:9052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.commercialbank.coin.com:9052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.supplier.pharma.com:9051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.supplier.pharma.com:9051
-      - CORE_PEER_LOCALMSPID=SupplierMSP
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.commercialbank.coin.com:9051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.commercialbank.coin.com:9051
+      - CORE_PEER_LOCALMSPID=CommercialBankMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer0.supplier.pharma.com:9445
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.commercialbank.coin.com:9445
       - CORE_METRICS_PROVIDER=prometheus
-      - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0supplier"}
+      - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0commercialbank"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
@@ -164,8 +163,8 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock
-      - ../organizations/peerOrganizations/supplier.pharma.com/peers/peer0.supplier.pharma.com:/etc/hyperledger/fabric
-      - peer0.supplier.pharma.com:/var/hyperledger/production
+      - ../organizations/peerOrganizations/commercialbank.coin.com/peers/peer0.commercialbank.coin.com:/etc/hyperledger/fabric
+      - peer0.commercialbank.coin.com:/var/hyperledger/production
     working_dir: /root
     command: peer node start
     ports:
@@ -174,7 +173,7 @@ services:
     depends_on:
       - couchdb1
     networks:
-      - pharma
+      - coin
 
   couchdb2:
     container_name: couchdb2
@@ -187,10 +186,10 @@ services:
     ports:
       - "9984:5984"
     networks:
-      - pharma
+      - coin
 
-  peer0.wholesaler.pharma.com:
-    container_name: peer0.wholesaler.pharma.com
+  peer0.consumer.coin.com:
+    container_name: peer0.consumer.coin.com
     image: hyperledger/fabric-peer:2.5.4
     labels:
       service: hyperledger-fabric
@@ -199,25 +198,25 @@ services:
       - FABRIC_LOGGING_SPEC=INFO
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_pharmaceutical
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_cbdc
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=true
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       # Peer specific variables
-      - CORE_PEER_ID=peer0.wholesaler.pharma.com
-      - CORE_PEER_ADDRESS=peer0.wholesaler.pharma.com:11051
+      - CORE_PEER_ID=peer0.consumer.coin.com
+      - CORE_PEER_ADDRESS=peer0.consumer.coin.com:11051
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.wholesaler.pharma.com:11052
+      - CORE_PEER_CHAINCODEADDRESS=peer0.consumer.coin.com:11052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.wholesaler.pharma.com:11051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.wholesaler.pharma.com:11051
-      - CORE_PEER_LOCALMSPID=WholesalerMSP
-      - CORE_OPERATIONS_LISTENADDRESS=peer0.wholesaler.pharma.com:9446
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.consumer.coin.com:11051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.consumer.coin.com:11051
+      - CORE_PEER_LOCALMSPID=ConsumerMSP
+      - CORE_OPERATIONS_LISTENADDRESS=peer0.consumer.coin.com:9446
       - CORE_METRICS_PROVIDER=prometheus
-      - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0wholesaler"}
+      - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0consumer"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s  
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb2:5984
@@ -227,76 +226,15 @@ services:
       - couchdb2    
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock      
-      - ../organizations/peerOrganizations/wholesaler.pharma.com/peers/peer0.wholesaler.pharma.com:/etc/hyperledger/fabric        
-      - peer0.wholesaler.pharma.com:/var/hyperledger/production
+      - ../organizations/peerOrganizations/consumer.coin.com/peers/peer0.consumer.coin.com:/etc/hyperledger/fabric        
+      - peer0.consumer.coin.com:/var/hyperledger/production
     working_dir: /root
     command: peer node start
     ports:
       - 11051:11051
       - 9446:9446
     networks:
-      - pharma
-
-  couchdb3:
-    container_name: couchdb3
-    image: couchdb:3.3.2
-    labels:
-      service: hyperledger-fabric
-    environment:
-      - COUCHDB_USER=admin
-      - COUCHDB_PASSWORD=adminpw
-    ports:
-      - "9954:5984"
-    networks:
-      - pharma
-
-  peer0.retailer.pharma.com:
-    container_name: peer0.retailer.pharma.com
-    image: hyperledger/fabric-peer:2.5.4
-    labels:
-      service: hyperledger-fabric
-    environment:
-      #Generic peer variables
-      - FABRIC_LOGGING_SPEC=INFO
-      #- FABRIC_LOGGING_SPEC=DEBUG
-      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_pharmaceutical
-      - CORE_PEER_TLS_ENABLED=true
-      - CORE_PEER_PROFILE_ENABLED=true
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      # Peer specific variables
-      - CORE_PEER_ID=peer0.retailer.pharma.com
-      - CORE_PEER_ADDRESS=peer0.retailer.pharma.com:13051
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:13051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.retailer.pharma.com:13052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:13052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.retailer.pharma.com:13051
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.retailer.pharma.com:13051
-      - CORE_PEER_LOCALMSPID=RetailerMSP
-      - CORE_OPERATIONS_LISTENADDRESS=peer0.retailer.pharma.com:9356
-      - CORE_METRICS_PROVIDER=prometheus
-      - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0retailer"}
-      - CORE_CHAINCODE_EXECUTETIMEOUT=300s  
-      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb3:5984
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw
-    depends_on:
-      - couchdb3    
-    volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock      
-      - ../organizations/peerOrganizations/retailer.pharma.com/peers/peer0.retailer.pharma.com:/etc/hyperledger/fabric        
-      - peer0.retailer.pharma.com:/var/hyperledger/production
-    working_dir: /root
-    command: peer node start
-    ports:
-      - 13051:13051
-      - 9356:9356
-    networks:
-      - pharma
+      - coin
 
   cli:
     container_name: cli
@@ -316,9 +254,8 @@ services:
       - /var/run/docker.sock:/host/var/run/docker.sock
       - ../organizations:/opt/gopath/src/github.com/hyperledger/fabric/peer/organizations
     depends_on:
-      - peer0.producer.pharma.com
-      - peer0.supplier.pharma.com
-      - peer0.wholesaler.pharma.com
-      - peer0.retailer.pharma.com
+      - peer0.centralbank.coin.com
+      - peer0.commercialbank.coin.com
+      - peer0.consumer.coin.com
     networks:
-      - pharma
+      - coin

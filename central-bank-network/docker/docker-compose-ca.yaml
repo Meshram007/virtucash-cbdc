@@ -1,18 +1,18 @@
 version: '3.7'
 
 networks:
-  pharma:
-    name: fabric_pharmaceutical
+  coin:
+    name: fabric_cbdc
 
 services:
 
-  ca_producer:
+  ca_centralbank:
     image: hyperledger/fabric-ca:1.5.7
     labels:
       service: hyperledger-fabric
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-producer
+      - FABRIC_CA_SERVER_CA_NAME=ca-centralbank
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_PORT=7054
       - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:17054
@@ -21,18 +21,18 @@ services:
       - "17054:17054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ../organizations/fabric-ca/producer:/etc/hyperledger/fabric-ca-server
-    container_name: ca_producer
+      - ../organizations/fabric-ca/centralbank:/etc/hyperledger/fabric-ca-server
+    container_name: ca_centralbank
     networks:
-      - pharma
+      - coin
 
-  ca_supplier:
+  ca_commercialbank:
     image: hyperledger/fabric-ca:1.5.7
     labels:
       service: hyperledger-fabric
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-supplier
+      - FABRIC_CA_SERVER_CA_NAME=ca-commercialbank
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_PORT=8054
       - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:18054
@@ -41,18 +41,18 @@ services:
       - "18054:18054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ../organizations/fabric-ca/supplier:/etc/hyperledger/fabric-ca-server
-    container_name: ca_supplier
+      - ../organizations/fabric-ca/commercialbank:/etc/hyperledger/fabric-ca-server
+    container_name: ca_commercialbank
     networks:
-      - pharma
+      - coin
 
-  ca_wholesaler:
+  ca_consumer:
     image: hyperledger/fabric-ca:1.5.7
     labels:
       service: hyperledger-fabric
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-wholesaler
+      - FABRIC_CA_SERVER_CA_NAME=ca-consumer
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_PORT=11054
       - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:11055
@@ -61,31 +61,11 @@ services:
       - "11055:11055"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - ../organizations/fabric-ca/wholesaler:/etc/hyperledger/fabric-ca-server
-    container_name: ca_wholesaler
+      - ../organizations/fabric-ca/consumer:/etc/hyperledger/fabric-ca-server
+    container_name: ca_consumer
     networks:
-      - pharma
-
-  ca_retailer:
-    image: hyperledger/fabric-ca:1.5.7
-    labels:
-      service: hyperledger-fabric
-    environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
-      - FABRIC_CA_SERVER_CA_NAME=ca-retailer
-      - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_PORT=12054
-      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:12055
-    ports:
-      - "12054:12054"
-      - "12055:12055"
-    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
-    volumes:
-      - ../organizations/fabric-ca/retailer:/etc/hyperledger/fabric-ca-server
-    container_name: ca_retailer
-    networks:
-      - pharma
-      
+      - coin
+  
   ca_orderer:
     image: hyperledger/fabric-ca:1.5.7
     labels:
@@ -104,4 +84,4 @@ services:
       - ../organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
     container_name: ca_orderer
     networks:
-      - pharma
+      - coin

@@ -51,7 +51,7 @@ func (s *CBDCContract) Mint(ctx contractapi.TransactionContextInterface, amount 
 	if err != nil {
 		return fmt.Errorf("failed to get MSPID: %v", err)
 	}
-	if clientMSPID != "Org1MSP" {
+	if clientMSPID != "CentralBankMSP" {
 		return fmt.Errorf("client is not authorized to mint new tokens")
 	}
 
@@ -148,7 +148,7 @@ func (s *CBDCContract) Burn(ctx contractapi.TransactionContextInterface, amount 
 	if err != nil {
 		return fmt.Errorf("failed to get MSPID: %v", err)
 	}
-	if clientMSPID != "Org1MSP" {
+	if clientMSPID != "CentralBankMSP" {
 		return fmt.Errorf("client is not authorized to mint new tokens")
 	}
 
@@ -590,8 +590,8 @@ func (s *CBDCContract) Initialize(ctx contractapi.TransactionContextInterface, n
 		return false, fmt.Errorf("failed to get MSPID: %v", err)
 	}
 
-	// if clientMSPID != "Org1MSP" {
-	if clientMSPID != "ProducerMSP" {
+	// if clientMSPID != "CentralBankMSP" {
+	if clientMSPID != "CentralBankMSP" {
 		return false, fmt.Errorf("client is not authorized to initialize contract")
 	}
 

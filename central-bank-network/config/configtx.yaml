@@ -16,7 +16,7 @@ Organizations:
     # ID to load the MSP definition as
     ID: OrdererMSP
     # MSPDir is the filesystem path which contains the MSP configuration
-    MSPDir: ../organizations/ordererOrganizations/pharma.com/msp
+    MSPDir: ../organizations/ordererOrganizations/coin.com/msp
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
     #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
@@ -31,93 +31,73 @@ Organizations:
         Type: Signature
         Rule: "OR('OrdererMSP.admin')"
     OrdererEndpoints:
-      - orderer.pharma.com:7050
-  - &Producer
+      - orderer.coin.com:7050
+  - &CentralBank
     # DefaultOrg defines the organization which is used in the sampleconfig
     # of the fabric.git development environment
-    Name: ProducerMSP
+    Name: CentralBankMSP
     # ID to load the MSP definition as
-    ID: ProducerMSP
-    MSPDir: ../organizations/peerOrganizations/producer.pharma.com/msp
+    ID: CentralBankMSP
+    MSPDir: ../organizations/peerOrganizations/centralbank.coin.com/msp
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
     #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('ProducerMSP.admin', 'ProducerMSP.peer', 'ProducerMSP.client')"
+        Rule: "OR('CentralBankMSP.admin', 'CentralBankMSP.peer', 'CentralBankMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('ProducerMSP.admin', 'ProducerMSP.client')"
+        Rule: "OR('CentralBankMSP.admin', 'CentralBankMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('ProducerMSP.admin')"
+        Rule: "OR('CentralBankMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('ProducerMSP.peer')"
-  - &Supplier
+        Rule: "OR('CentralBankMSP.peer')"
+  - &CommercialBank
     # DefaultOrg defines the organization which is used in the sampleconfig
     # of the fabric.git development environment
-    Name: SupplierMSP
+    Name: CommercialBankMSP
     # ID to load the MSP definition as
-    ID: SupplierMSP
-    MSPDir: ../organizations/peerOrganizations/supplier.pharma.com/msp
+    ID: CommercialBankMSP
+    MSPDir: ../organizations/peerOrganizations/commercialbank.coin.com/msp
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
     #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('SupplierMSP.admin', 'SupplierMSP.peer', 'SupplierMSP.client')"
+        Rule: "OR('CommercialBankMSP.admin', 'CommercialBankMSP.peer', 'CommercialBankMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('SupplierMSP.admin', 'SupplierMSP.client')"
+        Rule: "OR('CommercialBankMSP.admin', 'CommercialBankMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('SupplierMSP.admin')"
+        Rule: "OR('CommercialBankMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('SupplierMSP.peer')"
-  - &Wholesaler
-    Name: WholesalerMSP
+        Rule: "OR('CommercialBankMSP.peer')"
+  - &Consumer
+    Name: ConsumerMSP
 
-    ID: WholesalerMSP
+    ID: ConsumerMSP
 
-    MSPDir: ../organizations/peerOrganizations/wholesaler.pharma.com/msp
+    MSPDir: ../organizations/peerOrganizations/consumer.coin.com/msp
 
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('WholesalerMSP.admin', 'WholesalerMSP.peer', 'WholesalerMSP.client')"
+        Rule: "OR('ConsumerMSP.admin', 'ConsumerMSP.peer', 'ConsumerMSP.client')"
       Writers:
         Type: Signature
-        Rule: "OR('WholesalerMSP.admin', 'WholesalerMSP.client')"
+        Rule: "OR('ConsumerMSP.admin', 'ConsumerMSP.client')"
       Admins:
         Type: Signature
-        Rule: "OR('WholesalerMSP.admin')"
+        Rule: "OR('ConsumerMSP.admin')"
       Endorsement:
         Type: Signature
-        Rule: "OR('WholesalerMSP.peer')"
-  - &Retailer
-    Name: RetailerMSP
-
-    ID: RetailerMSP
-
-    MSPDir: ../organizations/peerOrganizations/retailer.pharma.com/msp
-
-    Policies:
-      Readers:
-        Type: Signature
-        Rule: "OR('RetailerMSP.admin', 'RetailerMSP.peer', 'RetailerMSP.client')"
-      Writers:
-        Type: Signature
-        Rule: "OR('RetailerMSP.admin', 'RetailerMSP.client')"
-      Admins:
-        Type: Signature
-        Rule: "OR('RetailerMSP.admin')"
-      Endorsement:
-        Type: Signature
-        Rule: "OR('RetailerMSP.peer')"
+        Rule: "OR('ConsumerMSP.peer')"
 
 ################################################################################
 #
@@ -213,7 +193,7 @@ Application: &ApplicationDefaults
 ################################################################################
 Orderer: &OrdererDefaults
   Addresses:
-    - orderer.pharma.com:7050
+    - orderer.coin.com:7050
   BatchTimeout: 2s
   BatchSize:
     MaxMessageCount: 10
@@ -291,18 +271,17 @@ Profiles:
       OrdererType: etcdraft
       EtcdRaft:
         Consenters:
-          - Host: orderer.pharma.com
+          - Host: orderer.coin.com
             Port: 7050
-            ClientTLSCert: ../organizations/ordererOrganizations/pharma.com/orderers/orderer.pharma.com/tls/server.crt
-            ServerTLSCert: ../organizations/ordererOrganizations/pharma.com/orderers/orderer.pharma.com/tls/server.crt
+            ClientTLSCert: ../organizations/ordererOrganizations/coin.com/orderers/orderer.coin.com/tls/server.crt
+            ServerTLSCert: ../organizations/ordererOrganizations/coin.com/orderers/orderer.coin.com/tls/server.crt
       Organizations:
         - *OrdererOrg
       Capabilities: *OrdererCapabilities
     Application:
       <<: *ApplicationDefaults
       Organizations:
-        - *Producer
-        - *Supplier
-        - *Wholesaler
-        - *Retailer
+        - *CentralBank
+        - *CommercialBank
+        - *Consumer
       Capabilities: *ApplicationCapabilities

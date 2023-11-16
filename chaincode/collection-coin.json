@@ -1,10 +1,10 @@
 [
     {
-      "name": "OrderCollection",
+      "name": "CoinCollection",
       "policy": "OR('CentralBankMSP.member', 'CommercialBankMSP.member')",
       "requiredPeerCount": 1,
       "maxPeerCount": 1,
-      "blockToLive": 100,
+      "blockToLive": 1000000,
       "memberOnlyRead": true
     }
 ]

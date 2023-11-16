@@ -24,6 +24,7 @@ const allowancePrefix = "allowance"
 // CBDCContract provides functions for transferring tokens between accounts
 type CBDCContract struct {
 	contractapi.Contract
+	IsPaused bool
 }
 
 // event provides an organized struct for emitting events
@@ -31,6 +32,200 @@ type event struct {
 	From  string `json:"from"`
 	To    string `json:"to"`
 	Value int    `json:"value"`
+}
+
+/** Governance Functions  */
+
+// PauseTokenTransfers pauses token transfers. Only authorized entities can call this function.
+func (s *CBDCContract) PauseTokenTransfers(ctx contractapi.TransactionContextInterface) (bool, error) {
+	// // Governance check: Only authorized entities can pause token transfers
+	// if !s.isAuthorizedEntity(ctx) {
+	// 	return false, fmt.Errorf("Unauthorized entity. Pausing token transfers is restricted.")
+	// }
+
+	s.IsPaused = true
+	mspID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return false, fmt.Errorf("Error getting MSPID: %v", err)
+	}
+	log.Printf("Token transfers are paused by %s", mspID)
+	return true, nil
+}
+
+// UnpauseTokenTransfers unpauses token transfers. Only authorized entities can call this function.
+func (s *CBDCContract) UnpauseTokenTransfers(ctx contractapi.TransactionContextInterface) (bool, error) {
+	// // Governance check: Only authorized entities can unpause token transfers
+	// if !s.isAuthorizedEntity(ctx) {
+	// 	return false, fmt.Errorf("Unauthorized entity. Unpausing token transfers is restricted.")
+	// }
+
+	s.IsPaused = false
+	mspID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return false, fmt.Errorf("Error getting MSPID: %v", err)
+	}
+	log.Printf("Token transfers are unpaused by %s", mspID)
+	return true, nil
+}
+
+// GetAllAccountsWithOrgs returns a list of all accounts along with their respective organizations on the network
+func (s *CBDCContract) GetAllAccountsWithOrgs(ctx contractapi.TransactionContextInterface) (map[string]string, error) {
+	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all accounts: %v", err)
+	}
+	defer resultsIterator.Close()
+
+	accountsWithOrgs := make(map[string]string)
+
+	// Get the MSP ID of the submitting client identity
+	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get MSPID: %v", err)
+	}
+
+	// Iterate through the results and collect the account names with their respective organizations
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("error iterating over results: %v", err)
+		}
+
+		// Assuming the account name is the key in the world state
+		accountName := queryResponse.Key
+		accountsWithOrgs[accountName] = clientMSPID
+	}
+
+	return accountsWithOrgs, nil
+}
+
+// private data collection functions
+
+type Bond struct {
+	AssetType       string `json:"assetType"`
+	BondName        string `json:"bondName"`
+	SecretPhrase    string `json:"secretPhrase"`
+	BondValueInCBDC string `json:"bondValueInCBDC"`
+	BondID          string `json:"bondID"`
+}
+
+const collectionName string = "CoinCollection"
+
+// BondExists returns true when asset with given ID exists in private data collection
+func (s *CBDCContract) BondExists(ctx contractapi.TransactionContextInterface, BondID string) (bool, error) {
+
+	data, err := ctx.GetStub().GetPrivateDataHash(collectionName, BondID)
+
+	if err != nil {
+		return false, err
+	}
+
+	return data != nil, nil
+}
+
+// CreateCBDCBond creates a new instance of Bond
+func (s *CBDCContract) CreateCBDCBond(ctx contractapi.TransactionContextInterface, bondID string) (string, error) {
+
+	clientOrgID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return "", err
+	}
+
+	if clientOrgID == "CentralBankMSP" {
+		exists, err := s.BondExists(ctx, bondID)
+		if err != nil {
+			return "", fmt.Errorf("could not read from world state. %s", err)
+		} else if exists {
+			return "", fmt.Errorf("the asset %s already exists", bondID)
+		}
+
+		bond := new(Bond)
+
+		transientData, err := ctx.GetStub().GetTransient()
+		if err != nil {
+			return "", err
+		}
+
+		if len(transientData) == 0 {
+			return "", fmt.Errorf("Please provide the private data of bondName, secretPhrase, bondValueInCBDC, dealerName")
+		}
+
+		bondName, exists := transientData["bondName"]
+		if !exists {
+			return "", fmt.Errorf("The bondName was not specified in transient data. Please try again")
+		}
+		bond.BondName = string(bondName)
+
+		secretPhrase, exists := transientData["secretPhrase"]
+		if !exists {
+			return "", fmt.Errorf("The secretPhrase was not specified in transient data. Please try again")
+		}
+		bond.SecretPhrase = string(secretPhrase)
+
+		bondValueInCBDC, exists := transientData["bondValueInCBDC"]
+		if !exists {
+			return "", fmt.Errorf("The bondValueInCBDC was not specified in transient data. Please try again")
+		}
+		bond.BondValueInCBDC = string(bondValueInCBDC)
+
+		bond.AssetType = "Bond"
+		bond.BondID = bondID
+
+		bytes, _ := json.Marshal(bond)
+		err = ctx.GetStub().PutPrivateData(collectionName, bondID, bytes)
+		if err != nil {
+			return "", fmt.Errorf("could not able to write the data")
+		}
+		return fmt.Sprintf("Bond with id %v added successfully", bondID), nil
+	} else {
+		return fmt.Sprintf("Bond cannot be created by organisation with MSPID %v ", clientOrgID), nil
+	}
+}
+
+// GetCBDCBond retrieves an instance of Bond from the private data collection
+func (s *CBDCContract) GetCBDCBond(ctx contractapi.TransactionContextInterface, bondID string) (*Bond, error) {
+	exists, err := s.BondExists(ctx, bondID)
+	if err != nil {
+		return nil, fmt.Errorf("Could not read from world state. %s", err)
+	} else if !exists {
+		return nil, fmt.Errorf("The asset %s does not exist", bondID)
+	}
+
+	bytes, err := ctx.GetStub().GetPrivateData(collectionName, bondID)
+	if err != nil {
+		return nil, err
+	}
+	bond := new(Bond)
+
+	err = json.Unmarshal(bytes, bond)
+
+	if err != nil {
+		return nil, fmt.Errorf("Could not unmarshal private data collection data to type Bond")
+	}
+
+	return bond, nil
+
+}
+
+// RemoveCBDCBond deletes an instance of Bond from the private data collection
+func (s *CBDCContract) RemoveCBDCBond(ctx contractapi.TransactionContextInterface, bondID string) error {
+	clientOrgID, err := ctx.GetClientIdentity().GetMSPID()
+	if err != nil {
+		return err
+	}
+	if clientOrgID == "CentralBankMSP" {
+		exists, err := s.BondExists(ctx, bondID)
+
+		if err != nil {
+			return fmt.Errorf("could not read from world state. %s", err)
+		} else if !exists {
+			return fmt.Errorf("the asset %s does not exist", bondID)
+		}
+
+		return ctx.GetStub().DelPrivateData(collectionName, bondID)
+	} else {
+		return fmt.Errorf("organisation with %v cannot delete the bond", clientOrgID)
+	}
 }
 
 // Mint creates new tokens and adds them to minter's account balance
@@ -44,6 +239,11 @@ func (s *CBDCContract) Mint(ctx contractapi.TransactionContextInterface, amount 
 	}
 	if !initialized {
 		return fmt.Errorf("Contract options need to be set before calling any function, call Initialize() to initialize contract")
+	}
+
+	// Governance check: Ensure token transfers are not paused
+	if s.IsPaused {
+		return fmt.Errorf("Token transfers are paused. Minting tokens is restricted.")
 	}
 
 	// Check minter authorization - this sample assumes Org1 is the central banker with privilege to mint new tokens
@@ -143,6 +343,12 @@ func (s *CBDCContract) Burn(ctx contractapi.TransactionContextInterface, amount 
 	if !initialized {
 		return fmt.Errorf("Contract options need to be set before calling any function, call Initialize() to initialize contract")
 	}
+
+	// Governance check: Ensure token transfers are not paused
+	if s.IsPaused {
+		return fmt.Errorf("Token transfers are paused. Minting tokens is restricted.")
+	}
+
 	// Check minter authorization - this sample assumes Org1 is the central banker with privilege to burn new tokens
 	clientMSPID, err := ctx.GetClientIdentity().GetMSPID()
 	if err != nil {

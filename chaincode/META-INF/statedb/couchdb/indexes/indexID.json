@@ -1,10 +1,10 @@
 {
     "index": {
         "fields": [
-            "MedicineName"
+            "CoinName"
         ]
     },
-    "ddoc": "indexMedicineNameDoc",
-    "name": "indexMedicineName",
+    "ddoc": "indexCoinNameDoc",
+    "name": "indexCoinName",
     "type": "json"
 }

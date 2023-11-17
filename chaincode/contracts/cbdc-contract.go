@@ -983,7 +983,7 @@ func BondResultIteratorFunction(resultsIterator shim.StateQueryIteratorInterface
 	return bonds, nil
 }
 
-func (s *CBDCContract) GetCombinedHistory(ctx contractapi.TransactionContextInterface) (map[string]interface{}, error) {
+func (s *CBDCContract) GetAllAssets(ctx contractapi.TransactionContextInterface) (map[string]interface{}, error) {
 	cbdcHistory, err := s.GetCBDCHistory(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get CBDC history: %v", err)

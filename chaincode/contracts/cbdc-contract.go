@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -15,6 +17,7 @@ const nameKey = "name"
 const symbolKey = "symbol"
 const decimalsKey = "decimals"
 const totalSupplyKey = "totalSupply"
+const ledgerKey = "CBDC"
 
 // Define objectType names for prefix
 const allowancePrefix = "allowance"
@@ -27,12 +30,30 @@ type CBDCContract struct {
 	IsPaused bool
 }
 
+// MintTransaction represents a minting transaction
+type MintTransaction struct {
+	TxID          string `json:"txId"`
+	Timestamp     string `json:"timestamp"`
+	MinterAccount string `json:"minterAccount"`
+	Amount        string `json:"amount"`
+}
+
+type Bond struct {
+	AssetType       string `json:"assetType"`
+	BondName        string `json:"bondName"`
+	SecretPhrase    string `json:"secretPhrase"`
+	BondValueInCBDC string `json:"bondValueInCBDC"`
+	BondID          string `json:"bondID"`
+}
+
 // event provides an organized struct for emitting events
 type event struct {
 	From  string `json:"from"`
 	To    string `json:"to"`
 	Value int    `json:"value"`
 }
+
+const collectionName string = "CoinCollection"
 
 /** Governance Functions  */
 
@@ -99,17 +120,7 @@ func (s *CBDCContract) GetAllAccountsWithOrgs(ctx contractapi.TransactionContext
 	return accountsWithOrgs, nil
 }
 
-// private data collection functions
-
-type Bond struct {
-	AssetType       string `json:"assetType"`
-	BondName        string `json:"bondName"`
-	SecretPhrase    string `json:"secretPhrase"`
-	BondValueInCBDC string `json:"bondValueInCBDC"`
-	BondID          string `json:"bondID"`
-}
-
-const collectionName string = "CoinCollection"
+/** private data collection functions */
 
 // BondExists returns true when asset with given ID exists in private data collection
 func (s *CBDCContract) BondExists(ctx contractapi.TransactionContextInterface, BondID string) (bool, error) {
@@ -315,6 +326,41 @@ func (s *CBDCContract) Mint(ctx contractapi.TransactionContextInterface, amount 
 		return err
 	}
 
+	strAmount := strconv.FormatInt(int64(amount), 10)
+
+	// Get transaction ID
+	txID := ctx.GetStub().GetTxID()
+
+	// Get transaction timestamp
+	txTimestamp, err := ctx.GetStub().GetTxTimestamp()
+	if err != nil {
+		return fmt.Errorf("failed to get transaction timestamp: %v", err)
+	}
+
+	// Format timestamp
+	timestamp := txTimestamp.AsTime()
+	formattedTime := timestamp.Format(time.RFC1123)
+
+	// Record the minting transaction in the ledger
+	mintTransaction := MintTransaction{
+		TxID:          txID,
+		Timestamp:     formattedTime,
+		MinterAccount: minter,
+		Amount:        strAmount,
+	}
+
+	// Marshal the mint transaction to JSON
+	mintTransactionJSON, err := json.Marshal(mintTransaction)
+	if err != nil {
+		return fmt.Errorf("failed to marshal mint transaction: %v", err)
+	}
+
+	// Append the mint transaction to the ledger
+	err = ctx.GetStub().PutState(ledgerKey, mintTransactionJSON)
+	if err != nil {
+		return fmt.Errorf("failed to record mint transaction: %v", err)
+	}
+
 	// Emit the Transfer event
 	transferEvent := event{"0x0", minter, amount}
 	transferEventJSON, err := json.Marshal(transferEvent)
@@ -414,6 +460,41 @@ func (s *CBDCContract) Burn(ctx contractapi.TransactionContextInterface, amount 
 	err = ctx.GetStub().PutState(totalSupplyKey, []byte(strconv.Itoa(totalSupply)))
 	if err != nil {
 		return err
+	}
+
+	strAmount := strconv.FormatInt(int64(amount), 10)
+
+	// Get transaction ID
+	txID := ctx.GetStub().GetTxID()
+
+	// Get transaction timestamp
+	txTimestamp, err := ctx.GetStub().GetTxTimestamp()
+	if err != nil {
+		return fmt.Errorf("failed to get transaction timestamp: %v", err)
+	}
+
+	// Format timestamp
+	timestamp := txTimestamp.AsTime()
+	formattedTime := timestamp.Format(time.RFC1123)
+
+	// Record the minting transaction in the ledger
+	mintTransaction := MintTransaction{
+		TxID:          txID,
+		Timestamp:     formattedTime,
+		MinterAccount: minter,
+		Amount:        strAmount,
+	}
+
+	// Marshal the mint transaction to JSON
+	mintTransactionJSON, err := json.Marshal(mintTransaction)
+	if err != nil {
+		return fmt.Errorf("failed to marshal mint transaction: %v", err)
+	}
+
+	// Append the mint transaction to the ledger
+	err = ctx.GetStub().PutState(ledgerKey, mintTransactionJSON)
+	if err != nil {
+		return fmt.Errorf("failed to record mint transaction: %v", err)
 	}
 
 	// Emit the Transfer event
@@ -828,7 +909,99 @@ func (s *CBDCContract) Initialize(ctx contractapi.TransactionContextInterface, n
 	return true, nil
 }
 
-// Helper Functions
+/** Rich Queries Functions */
+
+func (s *CBDCContract) GetCBDCHistory(ctx contractapi.TransactionContextInterface) ([]*MintTransaction, error) {
+
+	resultsIterator, err := ctx.GetStub().GetHistoryForKey(ledgerKey)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("resultsIterator", resultsIterator)
+
+	defer resultsIterator.Close() // check for details why do we need to close it
+
+	var records []*MintTransaction
+	for resultsIterator.HasNext() {
+		response, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var mintingHistory MintTransaction
+		if len(response.Value) > 0 {
+			err = json.Unmarshal(response.Value, &mintingHistory)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		timestamp := response.Timestamp.AsTime()
+
+		formattedTime := timestamp.Format(time.RFC1123)
+
+		record := MintTransaction{
+			TxID:          response.TxId,
+			Timestamp:     formattedTime,
+			MinterAccount: mintingHistory.MinterAccount,
+			Amount:        mintingHistory.Amount,
+		}
+		records = append(records, &record)
+	}
+
+	return records, nil
+}
+
+func (s *CBDCContract) GetAllCBDCBondsHistory(ctx contractapi.TransactionContextInterface) ([]*Bond, error) {
+	queryString := `{"selector":{"assetType":"Bond"}}`
+	resultsIterator, err := ctx.GetStub().GetPrivateDataQueryResult(collectionName, queryString)
+	fmt.Println("Result of database test", resultsIterator, err)
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+	return BondResultIteratorFunction(resultsIterator)
+}
+
+func BondResultIteratorFunction(resultsIterator shim.StateQueryIteratorInterface) ([]*Bond, error) {
+	var bonds []*Bond
+	for resultsIterator.HasNext() {
+		fmt.Println("Result of database test 2", resultsIterator)
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var order Bond
+		err = json.Unmarshal(queryResult.Value, &order)
+		if err != nil {
+			return nil, err
+		}
+		bonds = append(bonds, &order)
+	}
+
+	return bonds, nil
+}
+
+func (s *CBDCContract) GetCombinedHistory(ctx contractapi.TransactionContextInterface) (map[string]interface{}, error) {
+	cbdcHistory, err := s.GetCBDCHistory(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get CBDC history: %v", err)
+	}
+
+	cbdcBondHistory, err := s.GetAllCBDCBondsHistory(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get CBDC Bond history: %v", err)
+	}
+
+	result := make(map[string]interface{})
+	result["CBDCHistory"] = cbdcHistory
+	result["CBDCBondHistory"] = cbdcBondHistory
+
+	return result, nil
+}
+
+/** Helper Functions */
 
 // transferHelper is a helper function that transfers tokens from the "from" address to the "to" address
 // Dependant functions include Transfer and TransferFrom

@@ -82,7 +82,7 @@ peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.pha
 
 peer chaincode query -C pharmachannel -n pharmaceutical -c '{"function":"GetMedicineHistory","Args":["M-01"]}'
 
-======================================================== CBDC RELETED COMMANDS ============================================================
+======================================================= CBDC RELETED COMMANDS ============================================================
 
 peer lifecycle chaincode package kbapharma.tar.gz --path ${PWD}/../chaincode/ --lang golang --label kbapharma_1.0 
 
@@ -203,7 +203,7 @@ export BONDNAME=$(echo -n "CryptBond" | base64 | tr -d \\n)
 export SECRETPHRASE=$(echo -n "Red are new black" | base64 | tr -d \\n)
 export BONDVALUEINCBDC=$(echo -n "30000000" | base64 | tr -d \\n)
 
-peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.coin.com --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n virtucash-cbdc --peerAddresses localhost:7051 --tlsRootCertFiles $ORG1_PEER_TLSROOTCERT --peerAddresses localhost:9051 --tlsRootCertFiles $ORG2_PEER_TLSROOTCERT --peerAddresses localhost:11051 --tlsRootCertFiles $ORG3_PEER_TLSROOTCERT -c '{"Args":["CBDCContract:CreateCBDCBond","BOND-02"]}' --transient "{\"bondName\":\"$BONDNAME\",\"secretPhrase\":\"$SECRETPHRASE\",\"bondValueInCBDC\":\"$BONDVALUEINCBDC\"}"
+peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.coin.com --tls --cafile $ORDERER_CA -C $CHANNEL_NAME -n virtucash-cbdc --peerAddresses localhost:7051 --tlsRootCertFiles $ORG1_PEER_TLSROOTCERT --peerAddresses localhost:9051 --tlsRootCertFiles $ORG2_PEER_TLSROOTCERT --peerAddresses localhost:11051 --tlsRootCertFiles $ORG3_PEER_TLSROOTCERT -c '{"Args":["CBDCContract:CreateCBDCBond","BOND-02"]}'s --transient "{\"bondName\":\"$BONDNAME\",\"secretPhrase\":\"$SECRETPHRASE\",\"bondValueInCBDC\":\"$BONDVALUEINCBDC\"}"
 
 export BONDNAME=$(echo -n "BTCBond" | base64 | tr -d \\n)
 export SECRETPHRASE=$(echo -n "White are new black" | base64 | tr -d \\n)

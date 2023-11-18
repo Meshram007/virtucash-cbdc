@@ -8,7 +8,7 @@ import (
 )
 
 // Submit a transaction synchronously, blocking until it has been committed to the ledger.
-func submitTxnFn(organization string, channelName string, chaincodeName string, contractName string, txnType string, txnName string, args ...string) string {
+func submitTxnFn(organization string, channelName string, chaincodeName string, contractName string, txnType string, privateData map[string][]byte, txnName string, args ...string) string {
 
 	orgProfile := profile[organization]
 	mspID := orgProfile.MSPID
@@ -68,14 +68,14 @@ func submitTxnFn(organization string, channelName string, chaincodeName string, 
 			result = formatJSON(evaluateResult)
 		}
 
-		return fmt.Sprintf("*** Result:%s\n", result)
+		// return fmt.Sprintf("*** Result:%s\n", result)
 		return result
 
 	case "private":
 		result, err := contract.Submit(
 			txnName,
 			client.WithArguments(args...),
-			// client.WithTransient(privateData),
+			client.WithTransient(privateData),
 		)
 
 		if err != nil {

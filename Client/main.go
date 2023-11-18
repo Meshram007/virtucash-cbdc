@@ -15,33 +15,41 @@ func main() {
 	// 	"invoke",
 	// 	make(map[string][]byte),
 	// 	"Mint",
-	// 	"11",
+	// 	"13",
 	// )
 
 	// privateData := map[string][]byte{
-	// 	"make":       []byte("Maruti"),
-	// 	"model":      []byte("Alto"),
-	// 	"color":      []byte("Red"),
-	// 	"dealerName": []byte("Popular"),
+	// 	"bondName":        []byte("CryptBond"),
+	// 	"secretPhrase":    []byte("Red are new black"),
+	// 	"bondValueInCBDC": []byte("30000000"),
 	// }
 
+	// result := submitTxnFn(
+	// 	"centralbank",
+	// 	"cbdcchannel",
+	// 	"virtucash-cbdc",
+	// 	"CBDCContract",
+	// 	"invoke",
+	// 	"Mint",
+	// 	"11",
+	// )
 
-	result := submitTxnFn(
-		"centralbank",
-		"cbdcchannel",
-		"virtucash-cbdc",
-		"CBDCContract",
-		"invoke",
-		"Mint",
-		"11",
-	)
 
-	// result := submitTxnFn("dealer", "autochannel", "KBA-Automobile", "OrderContract", "private", privateData, "CreateOrder", "ORD-03")
-	// result := submitTxnFn("dealer", "autochannel", "KBA-Automobile", "OrderContract", "query", make(map[string][]byte), "ReadOrder", "ORD-03")
-	// result := submitTxnFn("manufacturer", "autochannel", "KBA-Automobile", "CarContract", "query", make(map[string][]byte), "GetAllCars")
-	// result := submitTxnFn("manufacturer", "autochannel", "KBA-Automobile", "OrderContract", "query", make(map[string][]byte), "GetAllOrders")
-	// result := submitTxnFn("manufacturer", "autochannel", "KBA-Automobile", "CarContract", "query", make(map[string][]byte), "GetMatchingOrders", "Car-06")
-	// result := submitTxnFn("manufacturer", "autochannel", "KBA-Automobile", "CarContract", "invoke", make(map[string][]byte), "MatchOrder", "Car-06", "ORD-01")
-	// result := submitTxnFn("mvd", "autochannel", "KBA-Automobile", "CarContract", "invoke", make(map[string][]byte), "RegisterCar", "Car-06", "Dani", "KL-01-CD-01")
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "TotalSupply")
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetCBDCHistory")
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllCBDCBondsHistory")
+
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "BalanceOf", "eDUwOTo6Q049Y2VudHJhbGJhbmthZG1pbixPVT1hZG1pbixPPUh5cGVybGVkZ2VyLFNUPU5vcnRoIENhcm9saW5hLEM9VVM6OkNOPWZhYnJpYy1jYS1zZXJ2ZXIsT1U9RmFicmljLE89SHlwZXJsZWRnZXIsU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==")
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "invoke", make(map[string][]byte), "Transfer", "eDUwOTo6Q049Y2VudHJhbGJhbmthZG1pbixPVT1hZG1pbixPPUh5cGVybGVkZ2VyLFNUPU5vcnRoIENhcm9saW5hLEM9VVM6OkNOPWZhYnJpYy1jYS1zZXJ2ZXIsT1U9RmFicmljLE89SHlwZXJsZWRnZXIsU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==","10")
+
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "private", privateData, "CreateCBDCBond", "BOND-001")
+	// result := submitTxnFn("commercialbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllCBDCBondsHistory")
+	// result := submitTxnFn("consumer", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllCBDCBondsHistory")
+
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllAssets")
+
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetMatchingOrders", "Car-06")
+	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "invoke", make(map[string][]byte), "MatchOrder", "Car-06", "ORD-01")
+	// result := submitTxnFn("consumer", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "invoke", make(map[string][]byte), "RegisterCar", "Car-06", "Dani", "KL-01-CD-01")
 	fmt.Println(result)
 }

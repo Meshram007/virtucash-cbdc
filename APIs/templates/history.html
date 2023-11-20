@@ -1,0 +1,53 @@
+{{template "header.html"}}
+
+<div class="px-3 py-2 bg-secondary text-white">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <h2 href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+                <svg class="bi d-block mx-auto mb-1 " width="24" height="24"></svg>
+                {{.title}}
+            </h2>
+            <a type="button" href="/mvd" class="btn btn-danger filled" class="nav-link text-white">
+                Back to MVD Dashboard
+            </a>
+            <a type="button" href="/" class="btn btn-danger filled marginLeft" class="nav-link text-white">
+                Logout
+            </a>
+        </div>
+    </div>
+</div>
+</br>
+
+<div class="row">
+    <div class="table-container">
+        <table class="table" style="width:100%">
+            <thead id="colored-table">
+                <th>Make</th>
+                <th>Model</th>
+                <th>Color</th>
+                <th>DOM</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>TimeStamp</th>
+                <th>IsDelete</th>
+            </thead>
+            <tbody>
+                {{range .itemList}}
+                <tr>
+                    <td>{{.Record.Make}}</td>
+                    <td>{{.Record.Model}}</td>
+                    <td>{{.Record.Color}}</td>
+                    <td>{{.Record.DateOfManufacture}}</td>
+                    <td>{{.Record.Status}}</td>
+                    <td>{{.Record.OwnedBy}}</td>
+                    <td>{{.Timestamp}}</td>
+                    <td>{{.IsDelete}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+{{template "footer.html"}}

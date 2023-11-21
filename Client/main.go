@@ -41,9 +41,9 @@ func main() {
 	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "BalanceOf", "eDUwOTo6Q049Y2VudHJhbGJhbmthZG1pbixPVT1hZG1pbixPPUh5cGVybGVkZ2VyLFNUPU5vcnRoIENhcm9saW5hLEM9VVM6OkNOPWZhYnJpYy1jYS1zZXJ2ZXIsT1U9RmFicmljLE89SHlwZXJsZWRnZXIsU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==")
 	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "invoke", make(map[string][]byte), "Transfer", "eDUwOTo6Q049Y2VudHJhbGJhbmthZG1pbixPVT1hZG1pbixPPUh5cGVybGVkZ2VyLFNUPU5vcnRoIENhcm9saW5hLEM9VVM6OkNOPWZhYnJpYy1jYS1zZXJ2ZXIsT1U9RmFicmljLE89SHlwZXJsZWRnZXIsU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==","10")
 
-	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "private", privateData, "CreateCBDCBond", "BOND-001")
+	result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "private", privateData, "CreateCBDCBond", "BOND-001")
 	// result := submitTxnFn("commercialbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllCBDCBondsHistory")
-	 result := submitTxnFn("consumer", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllCBDCBondsHistory")
+	// result := submitTxnFn("consumer", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllCBDCBondsHistory")
 
 	// result := submitTxnFn("centralbank", "cbdcchannel", "virtucash-cbdc", "CBDCContract", "query", make(map[string][]byte), "GetAllAssets")
 

@@ -142,12 +142,9 @@ Commercial account :- eDUwOTo6Q049Y29tbWVyY2lhbGJhbmthZG1pbixPVT1hZG1pbixPPUh5cG
 
 Consumer account:- eDUwOTo6Q049Y29uc3VtZXJhZG1pbixPVT1hZG1pbixPPUh5cGVybGVkZ2VyLFNUPU5vcnRoIENhcm9saW5hLEM9VVM6OkNOPWZhYnJpYy1jYS1zZXJ2ZXIsT1U9RmFicmljLE89SHlwZXJsZWRnZXIsU1Q9Tm9ydGggQ2Fyb2xpbmEsQz1VUw==
 
-{
-    "BondName": "CryptoBond",
-    "SecretPhrase": "White is new blue",
-    "BondValueInCBDC": "2000030",
-    "BondID": "BOND-003"
-}
 
-839 0897 4953
-
+	AssetType       string `json:"assetType"`
+	BondName        string `json:"bondName"`
+	SecretPhrase    string `json:"secretPhrase"`
+	BondValueInCBDC string `json:"bondValueInCBDC"`
+	BondID          string `json:"bondID"`

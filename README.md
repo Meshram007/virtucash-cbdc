@@ -10,7 +10,11 @@ https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html
 **Clone The Reposistory**
 
 ```
-git clone https://github.com/Meshram007/virtucash-cbdc.git
+git clone https://gitlab.com/hyperledgerfabric2/NikhilNareshMeshram_CBDC.git
+```
+
+```
+cd NikhilNareshMeshram_CBDC-main
 ```
 
 ```
@@ -171,7 +175,9 @@ peer chaincode query -C cbdcchannel -n virtucash-cbdc -c '{"Args":["CBDCContract
 ```
 peer chaincode query -C cbdcchannel -n virtucash-cbdc -c '{"Args":["CBDCContract:GetAllAssets"]}' | jq
 ```
-
+```
+cd ..
+```
 **To view couchdb**
 
 http://localhost:7984/_utils/
@@ -180,6 +186,52 @@ userid: `admin`
 
 password: `adminpw`
 
+
+**To Clients**
+```
+cd Clients
+```
+```
+go mod tidy
+```
+```
+go mod vendor
+```
+```
+go run .
+```
+
+**To Events**
+```
+cd Events
+```
+```
+go mod tidy
+```
+```
+go mod vendor
+```
+```
+go run .
+```
+
+**To APIs**
+```
+cd APIs
+```
+```
+go mod tidy
+```
+```
+go mod vendor
+```
+```
+go run .
+```
+
+```
+http://localhost:3000
+```
 **Tear down the network**
 
 ```
